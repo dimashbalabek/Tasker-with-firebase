@@ -9,7 +9,7 @@ class DateSelector extends StatefulWidget {
 }
 
 class _DateSelectorState extends State<DateSelector> {
-  String selectedDate = DateFormat('yyyyMMdd').format(DateTime.now()); // Храним дату в формате yyyyMMdd
+  String selectedDate = DateFormat('yyyyMMdd').format(DateTime.now()); 
   int weekOffset = 0;
 
   List<DateTime> generateWeekDates(int weekOffset) {

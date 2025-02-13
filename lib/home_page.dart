@@ -3,10 +3,11 @@ import 'package:appwrite/appwrite.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_first_project/add_new_task.dart';
-import 'package:firebase_first_project/update_task.dart';
-import 'package:firebase_first_project/utils.dart';
-import 'package:firebase_first_project/widgets/task_card.dart';
+import 'package:firebase_first_project/core/utils.dart';
+import 'package:firebase_first_project/presentation/screens/add_new_task.dart';
+import 'package:firebase_first_project/presentation/screens/update_task.dart';
+import 'package:firebase_first_project/presentation/widgets/task_card.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';

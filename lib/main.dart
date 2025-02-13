@@ -1,15 +1,22 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_first_project/blocs/auth_bloc.dart';
-import 'package:firebase_first_project/fb_database.dart';
-import 'package:firebase_first_project/firebase_options.dart';
-import 'package:firebase_first_project/home_page.dart';
-import 'package:firebase_first_project/signup_page.dart';
+import 'package:firebase_first_project/data/source/noti_service.dart';
+import 'package:firebase_first_project/presentation/blocs/auth_bloc/auth_bloc.dart';
+import 'package:firebase_first_project/core/firebase_options.dart';
+import 'package:firebase_first_project/presentation/screens/history_page.dart';
+import 'package:firebase_first_project/presentation/screens/home_page.dart';
+import 'package:firebase_first_project/presentation/screens/profile_page.dart';
+import 'package:firebase_first_project/presentation/screens/signup_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox('myBox');
+  await NotiService().init();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -22,6 +29,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    NotiService().showNotification(
+      id: 1,
+      title: "Привет!",
+      body: "Это тестовое уведомление 🚀",
+);
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -102,7 +115,8 @@ class _MainPageState extends State<MainPage> {
 
   final List<Widget> _pages = [
     MyHomePage(),
-    const ProfilePage(),
+    HistoryPage(),
+    ProfilePage(),
   ];
 
   void _onTabTapped(int index) {
@@ -124,43 +138,14 @@ class _MainPageState extends State<MainPage> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            label: 'History',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
           ),
         ],
-      ),
-    );
-  }
-}
-
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final firebaseData = FireBaseData();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Welcome to your profile!',
-              style: TextStyle(fontSize: 24),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                await firebaseData.signOut();
-              },
-              child: const Text('Logout'),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -1,11 +1,11 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dotted_border/dotted_border.dart';
-import 'package:firebase_first_project/utils.dart';
+import 'package:firebase_first_project/core/utils.dart';
+import 'package:firebase_first_project/data/appwrite_db.dart';
+import 'package:firebase_first_project/data/fb_database.dart';
+import 'package:firebase_first_project/data/source/functions.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:appwrite/appwrite.dart';
 
@@ -15,8 +15,6 @@ class UpdateTask extends StatefulWidget {
   final title;
   final description;
   final color;
-
-
   const UpdateTask(
     {
       super.key,
@@ -33,25 +31,26 @@ class UpdateTask extends StatefulWidget {
 }
 
 class _UpdateTaskState extends State<UpdateTask> {
+  final appwriteService = AppwriteService();
+  final firebase = FireBaseData();
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
   DateTime selectedDate = DateTime.now();
   Color _selectedColor = Colors.blue;
+  String btn_txt = "SUBMIT";
   File? file;
  late Client client;
  late Storage storage;
  var inputFile;
+ bool isLoading = false;
  String id = "";
 
 
    void initState() {
     getTaskValues();
     super.initState();
-    client = Client()
-      ..setEndpoint('https://cloud.appwrite.io/v1') 
-      ..setProject('678a28d6001d26cfc714'); 
+    storage = appwriteService.storage;
 
-    storage = Storage(client);
   }
   
 
@@ -67,84 +66,6 @@ class _UpdateTaskState extends State<UpdateTask> {
     descriptionController.text = widget.description;
     _selectedColor = hexToColor(widget.color);
   }
-
-Future<void> updateTaskInDatabase() async {
-  try {
-    await FirebaseFirestore.instance.collection("tasks").doc(widget.taskId).update({
-      "title": titleController.text.trim(),
-      "description": descriptionController.text.trim(),
-      "date": todaysDateFormatted(),
-      "color": rgbToHex(_selectedColor),
-      "img": widget.task["img"],
-    });
-    print("Task updated successfully!");
-  } catch (e) {
-    print("Error updating task: $e");
-  }
-}
-
-  Future<XFile>pickImage(ImageSource source)async{
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source);
-    return pickedFile!;
-  }
-
-
-Future loadImage() async {
-  try {
-    final pickedFile = await pickImage(ImageSource.gallery);
-
-   final localFile = File(pickedFile.path);
-
-    if (pickedFile == null) {
-      throw Exception("No file selected");
-    }
-
-     inputFile = InputFile.fromPath(
-      path: pickedFile.path, 
-      filename: pickedFile.name, 
-    );
-
-    return localFile;
-
-  } catch (e) {
-    print("Error uploading image: $e");
-  }
-}
-
-Future<void> updatePhoto() async {
-  try {
-    if (widget.taskId == null || inputFile == null || storage == null) {
-      print("Ошибка: не все необходимые параметры инициализированы.");
-      return;
-    }
-
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.none) {
-      print("Нет подключения к интернету. Обновление изображения пропущено.");
-      return;
-    }
-
-      await storage.deleteFile(
-        bucketId: '678a2da0001c315f64f4',
-        fileId: widget.taskId,
-      );
-      print("Старое изображение успешно удалено.");
-
-    final fileId = widget.taskId;
-    await storage.createFile(
-      bucketId: '678a2da0001c315f64f4',
-      fileId: fileId,
-      file: inputFile,
-    );
-    print("Новое изображение успешно загружено.");
-  } catch (e) {
-    print("Ошибка при обновлении изображения: $e");
-  }
-}
-
-
-
 
 
   @override
@@ -186,10 +107,13 @@ Future<void> updatePhoto() async {
 
               GestureDetector(
                 onTap: () async {
-                  final image = await loadImage();
+                    inputFile = await ImageHelper.loadImage();
+                    
+
                   setState(() {
-                    file = image;
+                    file = inputFile;
                   });
+                  inputFile = InputFile.fromPath(path: inputFile.path);
                 },
                 child: DottedBorder(
                   borderType: BorderType.RRect,
@@ -243,21 +167,45 @@ Future<void> updatePhoto() async {
                 subheading: const Text('Select a different shade'),
               ),
               const SizedBox(height: 10),
-              ElevatedButton(
+               ElevatedButton(
                 onPressed: () async{
-                  await updateTaskInDatabase();
-                  await updatePhoto();
-
+                  setState(() {
+                    isLoading = true;
+                    btn_txt = "Please Wait...";
+                  });
+                  Future.delayed(Duration(microseconds: 900));
+                  await firebase.updateTaskInDatabase(titleController, descriptionController, widget.taskId, widget.task, _selectedColor);
+                  await appwriteService.updatePhoto(widget.taskId, inputFile);
+                  
+                  setState(() {
+                    btn_txt = "Done";
+                    isLoading = false;
+                  });
                   id = "";
                   Future.delayed(Duration(seconds: 1), () {Navigator.pop(context);});
-                  
                 },
-                child: const Text(
-                  'SUBMIT',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    isLoading?
+                    
+                    Container(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator()
+                      )
+                      :
+                      SizedBox(),
+                      
+                      SizedBox(width: 12,),
+                     Text(
+                      btn_txt,
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -267,6 +215,3 @@ Future<void> updatePhoto() async {
     );
   }
 }
-
-
-

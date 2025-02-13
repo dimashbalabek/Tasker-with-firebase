@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
-  bool netWorkIsNeed = true;
+
 class TaskCard extends StatelessWidget {
-  
   final Color color;
   final String headerText;
   final String descriptionText;
   final String scheduledDate;
-  final String? img;
+  final String? img; // Может быть null
   final bool habitCompleted;
   final VoidCallback? onStarTapped;
   final Function(bool?)? onChanged;
   final bool isRecent;
-  
-
 
   const TaskCard({
     super.key,
@@ -24,24 +21,13 @@ class TaskCard extends StatelessWidget {
     required this.scheduledDate,
     this.img,
     required this.onStarTapped,
-    required this.onChanged
+    required this.onChanged,
   });
-
-
-  
 
   @override
   Widget build(BuildContext context) {
-    if (img == null) {
-      netWorkIsNeed = false;
-    }else{
-      netWorkIsNeed = true;
-    }
     return Container(
-
-      padding: const EdgeInsets.symmetric(vertical: 20.0).copyWith(
-        left: 15,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 20.0).copyWith(left: 15),
       decoration: BoxDecoration(
         color: color,
         borderRadius: const BorderRadius.all(
@@ -58,6 +44,13 @@ class TaskCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
+                    IconButton(
+                      onPressed: onStarTapped,
+                      icon: isRecent
+                          ? const Icon(Icons.star_rounded, color: Colors.pink)
+                          : const Icon(Icons.star_outline_rounded),
+                      iconSize: 38,
+                    ),
                     Text(
                       headerText,
                       style: const TextStyle(
@@ -65,13 +58,11 @@ class TaskCard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    IconButton(
-                      onPressed: onStarTapped, 
-                      icon: isRecent? Icon(Icons.star_rounded, color: Colors.pink,) : Icon(Icons.star_outline_rounded), iconSize: 38,)
+
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(right: 20,),
+                  padding: const EdgeInsets.only(right: 20),
                   child: Text(
                     descriptionText,
                     style: const TextStyle(fontSize: 14),
@@ -79,31 +70,49 @@ class TaskCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-            
               ],
             ),
-
             Padding(
               padding: const EdgeInsets.only(right: 20),
               child: Row(
                 children: [
                   Checkbox(value: habitCompleted, onChanged: onChanged),
-                  Stack(children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(90),
-                      child: Image.asset("assets/images (1).jpeg", height: 50,width: 50, fit: BoxFit.fill,)
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(90),
+                        child: Image.asset(
+                          "assets/images (1).jpeg",
+                          height: 50,
+                          width: 50,
+                          fit: BoxFit.fill,
+                        ),
                       ),
-                  netWorkIsNeed? ClipRRect(
-                    child: Image.network(img!, height: 50, width: 50,),
-                    borderRadius: BorderRadius.circular(90),
-                    )
-                    :
-                    SizedBox() 
-
-                  ]),
+                      if (img != null && img!.isNotEmpty)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(90),
+                          child: Image.network(
+                            img!,
+                            height: 50,
+                            width: 50,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return const SizedBox(
+                                height: 50,
+                                width: 50,
+                                child: Center(child: CircularProgressIndicator()),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) =>
+                                const SizedBox(), 
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

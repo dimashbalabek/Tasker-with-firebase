@@ -1,7 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_first_project/blocs/auth_bloc.dart';
-import 'package:firebase_first_project/home_page.dart';
-import 'package:firebase_first_project/signup_page.dart';
+import 'package:firebase_first_project/presentation/blocs/auth_bloc/auth_bloc.dart';
+import 'package:firebase_first_project/presentation/screens/home_page.dart';
+import 'package:firebase_first_project/presentation/screens/signup_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -44,6 +43,10 @@ class _LoginPageState extends State<LoginPage> {
           if (state is AuthSuccess) {
             ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(content: Text(state.success)));
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+                  return MyHomePage();
+                },));
+                
           }
           if (state is AuthLoading) {
             

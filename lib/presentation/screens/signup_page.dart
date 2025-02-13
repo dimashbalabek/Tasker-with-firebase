@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_first_project/blocs/auth_bloc.dart';
-import 'package:firebase_first_project/home_page.dart';
-import 'package:firebase_first_project/login_page.dart';
+import 'package:firebase_first_project/data/appwrite_db.dart';
+import 'package:firebase_first_project/presentation/blocs/auth_bloc/auth_bloc.dart';
+import 'package:firebase_first_project/presentation/screens/home_page.dart';
+import 'package:firebase_first_project/presentation/screens/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,7 +18,10 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  final appwriteService = AppwriteService();
+
   final emailController = TextEditingController();
+  final nameController = TextEditingController();
   final passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
@@ -27,17 +32,6 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  // Future<void> createUserWithEmailAndPassword() async {
-  //   try {
-  //     final userCredential = await FirebaseAuth.instance
-  //         .createUserWithEmailAndPassword(
-  //             email: emailController.text.trim(),
-  //             password: passwordController.text.trim());
-  //     print(userCredential);
-  //   } on FirebaseAuthException catch (e) {
-  //     print(e.message);
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +45,18 @@ class _SignUpPageState extends State<SignUpPage> {
           }
 
           if (state is AuthSuccess) {
+            final user = FirebaseAuth.instance.currentUser;
+            if (user != null) {
+              FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+  'email': user.email,
+  'createdAt': Timestamp.now(),
+  'userName': nameController.text,
+  "name": nameController.text
+}, SetOptions(merge: true));
+
+              // appwriteService.upLoadPhoto(user.uid, inputFile)
+
+            }
             ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(content: Text(state.success)));
           }
@@ -68,6 +74,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   strokeWidth: 12.0,  
             ),
                 );
+                
               }
           
               if (state is AuthLoading) {
@@ -92,7 +99,13 @@ class _SignUpPageState extends State<SignUpPage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        hintText: 'Name',
+                      ),
+                    ),
                     const SizedBox(height: 20),
                     TextFormField(
                       controller: emailController,
@@ -113,8 +126,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       onPressed: () async {
                         context.read<AuthBloc>().add(AuthSignUpRequested(
                             email: emailController.text.trim(),
+                            userName: nameController.text,
                             password: passwordController.text.trim()));
-                        // await createUserWithEmailAndPassword();
+                        // await createUserWithEmailAndPassword();                    ;
                       },
                       child: const Text(
                         'SIGN UP',
