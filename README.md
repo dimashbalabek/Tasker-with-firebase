@@ -4,7 +4,9 @@
 An app for managing tasks and habits, allowing users to add, edit, delete, and mark tasks as completed. It uses Firebase and Appwrite for data and image storage.
 
 🔥 Features
+
 ✅ Create and edit tasks
+
 ⭐ Add important tasks to favorites
 📸 Upload images to tasks (Appwrite Storage)
 ☁ Store data in Firestore
