@@ -1,16 +1,22 @@
 # firebase_first_project
 
-A new Flutter project.
+📝 Habit Tracker 📅🚀
+An app for managing tasks and habits, allowing users to add, edit, delete, and mark tasks as completed. It uses Firebase and Appwrite for data and image storage.
 
-## Getting Started
+🔥 Features
+✅ Create and edit tasks
+⭐ Add important tasks to favorites
+📸 Upload images to tasks (Appwrite Storage)
+☁ Store data in Firestore
+📶 Check internet connection before performing operations
+🛠 Edit and delete tasks via a slide menu
+🌓 Filter tasks by importance
 
-This project is a starting point for a Flutter application.
+📦 Technologies Used
+🏗 Flutter – UI & Logic
+🔥 Firebase Firestore – Database
+🔑 Firebase Auth – Authentication
+📂 Appwrite Storage – Image Storage
+🌐 Connectivity Plus – Internet check
+🎯 Flutter Slidable – Swipe actions
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
