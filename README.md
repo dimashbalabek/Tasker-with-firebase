@@ -1,5 +1,5 @@
 # firebase_first_project
-
+Hosting URL: https://flutter-firebase-2eb48.web.app
 📝 Habit Tracker 📅🚀
 An app for managing tasks and habits, allowing users to add, edit, delete, and mark tasks as completed. It uses Firebase and Appwrite for data and image storage.
 
